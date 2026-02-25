@@ -50,7 +50,19 @@ public class Piece {
     //return a list of every square that is "controlled" by this piece. A square is controlled
     //if the piece capture into it legally.
     public ArrayList<Square> getControlledSquares(Square[][] board, Square start) {
-     return null;
+     ArrayList<Square> controlled = new ArrayList<>();
+     int r = start.getRow();
+     int c = start.getCol();
+     // pawns capture diagonally one forward in either direction
+     int dir = this.color ? -1 : 1; // white moves up (decreasing row), black moves down
+
+     int dr = r + dir;
+     if (dr >= 0 && dr < 8) {
+         if (c - 1 >= 0) controlled.add(board[dr][c - 1]);
+         if (c + 1 < 8) controlled.add(board[dr][c + 1]);
+     }
+
+     return controlled;
     }
     
 
@@ -61,6 +73,34 @@ public class Piece {
     //please note that your piece must have some sort of logic. Just being able to move to every square on the board is not
     //going to score any points.
     public ArrayList<Square> getLegalMoves(Board b, Square start){
-    	return null;
+    	ArrayList<Square> moves = new ArrayList<>();
+    	Square[][] board = b.getSquareArray();
+    	int r = start.getRow();
+    	int c = start.getCol();
+    	int dir = this.color ? -1 : 1; // white moves up, black moves down
+
+    	// forward two squares (this variant moves 2 instead of 1)
+    	int f1 = r + dir;
+    	int f2 = r + 2 * dir;
+    	if (f2 >= 0 && f2 < 8) {
+    		// ensure both intermediate and target squares are empty
+    		if (!board[f1][c].isOccupied() && !board[f2][c].isOccupied()) {
+    			moves.add(board[f2][c]);
+    		}
+    	}
+
+    	// captures: diagonally one forward
+    	if (f1 >= 0 && f1 < 8) {
+    		if (c - 1 >= 0 && board[f1][c - 1].isOccupied()
+    			&& board[f1][c - 1].getOccupyingPiece().getColor() != this.color) {
+    			moves.add(board[f1][c - 1]);
+    		}
+    		if (c + 1 < 8 && board[f1][c + 1].isOccupied()
+    			&& board[f1][c + 1].getOccupyingPiece().getColor() != this.color) {
+    			moves.add(board[f1][c + 1]);
+    		}
+    	}
+
+    	return moves;
     }
 }
