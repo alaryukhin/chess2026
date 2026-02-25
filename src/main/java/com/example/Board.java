@@ -77,7 +77,7 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
         boolean isWhite = true;
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
-                Square sq = new Square(isWhite, row, col);
+                Square sq = new Square(this, isWhite, row, col);
                 board[row][col] = sq;
                 this.add(sq);
                 isWhite = !isWhite;
