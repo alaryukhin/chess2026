@@ -166,6 +166,45 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
     public void mouseReleased(MouseEvent e) {
         endSquare = (Square) this.getComponentAt(new Point(e.getX(), e.getY()));
 
+        // Check if we have a valid starting piece and destination
+        if (currPiece != null && fromMoveSquare != null && endSquare != null) {
+            // Get legal moves for the piece
+            ArrayList<Square> legalMoves = currPiece.getLegalMoves(this, fromMoveSquare);
+            
+            // Check if the destination is a legal move
+            if (legalMoves.contains(endSquare)) {
+                // Note: if pawn captures the king, it's removed here
+                Piece capturedPiece = endSquare.removePiece();
+                if (capturedPiece != null && capturedPiece.isKing()) {
+                    // Pawn ate the king!
+                    String playerColor = currPiece.getColor() ? "White" : "Black";
+                    JOptionPane.showMessageDialog(
+                        null,
+                        playerColor + " pawn ate the king! " + playerColor + " wins!\nGame Over!",
+                        "King Captured",
+                        JOptionPane.INFORMATION_MESSAGE);
+                }
+                
+                // Move the piece to the new square
+                fromMoveSquare.removePiece();
+                endSquare.put(currPiece);
+                
+                // Check if pawn reached the end (row 0 or row 7) - either way, that color wins!
+                int destRow = endSquare.getRow();
+                if (destRow == 0 || destRow == 7) {
+                    String playerColor = currPiece.getColor() ? "White" : "Black";
+                    JOptionPane.showMessageDialog(
+                        null,
+                        playerColor + " pawn reached the end! " + playerColor + " wins!\nGame Over!",
+                        "Pawn Promotion",
+                        JOptionPane.INFORMATION_MESSAGE);
+                }
+                
+                // Switch turns
+                whiteTurn = !whiteTurn;
+            }
+        }
+        
         // using currPiece
         if(fromMoveSquare!= null){
             fromMoveSquare.setDisplay(true);

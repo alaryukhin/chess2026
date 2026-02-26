@@ -12,9 +12,11 @@ import javax.imageio.ImageIO;
 public class Piece {
     private final boolean color;
     private BufferedImage img;
+    private String imgFilePath;
     
     public Piece(boolean isWhite, String img_file) {
         this.color = isWhite;
+        this.imgFilePath = img_file;
          
         try {
             if (this.img == null) {
@@ -23,6 +25,10 @@ public class Piece {
           } catch (IOException e) {
             System.out.println("File not found: " + e.getMessage());
           }
+    }
+    
+    public boolean isKing() {
+        return imgFilePath.contains("king");
     }
     
     
@@ -53,13 +59,12 @@ public class Piece {
      ArrayList<Square> controlled = new ArrayList<>();
      int r = start.getRow();
      int c = start.getCol();
-     // pawns capture diagonally one forward in either direction
+     // pawns control vertically forward one square
      int dir = this.color ? -1 : 1; // white moves up (decreasing row), black moves down
 
      int dr = r + dir;
      if (dr >= 0 && dr < 8) {
-         if (c - 1 >= 0) controlled.add(board[dr][c - 1]);
-         if (c + 1 < 8) controlled.add(board[dr][c + 1]);
+         controlled.add(board[dr][c]);
      }
 
      return controlled;
@@ -79,25 +84,22 @@ public class Piece {
     	int c = start.getCol();
     	int dir = this.color ? -1 : 1; // white moves up, black moves down
 
-    	// forward two squares (this variant moves 2 instead of 1)
-    	int f1 = r + dir;
-    	int f2 = r + 2 * dir;
-    	if (f2 >= 0 && f2 < 8) {
-    		// ensure both intermediate and target squares are empty
-    		if (!board[f1][c].isOccupied() && !board[f2][c].isOccupied()) {
-    			moves.add(board[f2][c]);
-    		}
-    	}
+// forward one or two squares
+	int f1 = r + dir;
+	int f2 = r + 2 * dir;
+	// one square forward if empty
+	if (f1 >= 0 && f1 < 8 && !board[f1][c].isOccupied()) {
+		moves.add(board[f1][c]);
+		// two squares forward only if first is empty and second is empty
+		if (f2 >= 0 && f2 < 8 && !board[f2][c].isOccupied()) {
+			moves.add(board[f2][c]);
+		}
+	}
 
-    	// captures: diagonally one forward
+	// Capture vertically forward one square (can eat king too)
     	if (f1 >= 0 && f1 < 8) {
-    		if (c - 1 >= 0 && board[f1][c - 1].isOccupied()
-    			&& board[f1][c - 1].getOccupyingPiece().getColor() != this.color) {
-    			moves.add(board[f1][c - 1]);
-    		}
-    		if (c + 1 < 8 && board[f1][c + 1].isOccupied()
-    			&& board[f1][c + 1].getOccupyingPiece().getColor() != this.color) {
-    			moves.add(board[f1][c + 1]);
+    		if (board[f1][c].isOccupied() && board[f1][c].getOccupyingPiece().getColor() != this.color) {
+    			moves.add(board[f1][c]);
     		}
     	}
 
