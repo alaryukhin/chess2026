@@ -60,7 +60,12 @@ public class Piece {
      int r = start.getRow();
      int c = start.getCol();
      // pawns control vertically forward one square
-     int dir = this.color ? -1 : 1; // white moves up (decreasing row), black moves down
+     int dir;
+     if (this.color) {
+         dir = -1; // white moves up (decreasing row)
+     } else {
+         dir = 1;  // black moves down
+     }
 
      int dr = r + dir;
      if (dr >= 0 && dr < 8) {
@@ -82,7 +87,12 @@ public class Piece {
     	Square[][] board = b.getSquareArray();
     	int r = start.getRow();
     	int c = start.getCol();
-    	int dir = this.color ? -1 : 1; // white moves up, black moves down
+    	int dir;
+    	if (this.color) {
+    		dir = -1; // white moves up
+    	} else {
+    		dir = 1;  // black moves down
+    	}
 
 // forward one or two squares
 	int f1 = r + dir;
