@@ -12,9 +12,11 @@ import javax.imageio.ImageIO;
 public class Piece {
     private final boolean color;
     private BufferedImage img;
+    private String imgFilePath;
     
     public Piece(boolean isWhite, String img_file) {
         this.color = isWhite;
+        this.imgFilePath = img_file;
          
         try {
             if (this.img == null) {
@@ -23,6 +25,10 @@ public class Piece {
           } catch (IOException e) {
             System.out.println("File not found: " + e.getMessage());
           }
+    }
+    
+    public boolean isKing() {
+        return imgFilePath.contains("king");
     }
     
     
@@ -50,7 +56,23 @@ public class Piece {
     //return a list of every square that is "controlled" by this piece. A square is controlled
     //if the piece capture into it legally.
     public ArrayList<Square> getControlledSquares(Square[][] board, Square start) {
-     return null;
+     ArrayList<Square> controlled = new ArrayList<>();
+     int r = start.getRow();
+     int c = start.getCol();
+     // pawns control vertically forward one square
+     int dir;
+     if (this.color) {
+         dir = -1; // white moves up (decreasing row)
+     } else {
+         dir = 1;  // black moves down
+     }
+
+     int dr = r + dir;
+     if (dr >= 0 && dr < 8) {
+         controlled.add(board[dr][c]);
+     }
+
+     return controlled;
     }
     
 
@@ -61,6 +83,36 @@ public class Piece {
     //please note that your piece must have some sort of logic. Just being able to move to every square on the board is not
     //going to score any points.
     public ArrayList<Square> getLegalMoves(Board b, Square start){
-    	return null;
+    	ArrayList<Square> moves = new ArrayList<>();
+    	Square[][] board = b.getSquareArray();
+    	int r = start.getRow();
+    	int c = start.getCol();
+    	int dir;
+    	if (this.color) {
+    		dir = -1; // white moves up
+    	} else {
+    		dir = 1;  // black moves down
+    	}
+
+// forward one or two squares
+	int f1 = r + dir;
+	int f2 = r + 2 * dir;
+	// one square forward if empty
+	if (f1 >= 0 && f1 < 8 && !board[f1][c].isOccupied()) {
+		moves.add(board[f1][c]);
+		// two squares forward only if first is empty and second is empty
+		if (f2 >= 0 && f2 < 8 && !board[f2][c].isOccupied()) {
+			moves.add(board[f2][c]);
+		}
+	}
+
+	// Capture vertically forward one square (can eat king too)
+    	if (f1 >= 0 && f1 < 8) {
+    		if (board[f1][c].isOccupied() && board[f1][c].getOccupyingPiece().getColor() != this.color) {
+    			moves.add(board[f1][c]);
+    		}
+    	}
+
+    	return moves;
     }
 }
