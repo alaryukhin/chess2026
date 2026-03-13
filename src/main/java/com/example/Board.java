@@ -74,8 +74,16 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
         //the reason this is required has to do with how visual components are rendered, so if you neglect to do this
         //you will not see any of your squares show up on the board!
         // Where's the "add" method? Stay tuned for next unit where we discover where it is and why we can do this action.
-        
-        
+        boolean isWhite = true;
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                Square sq = new Square(this, isWhite, row, col);
+                board[row][col] = sq;
+                this.add(sq);
+                isWhite = !isWhite;
+            }
+            isWhite = !isWhite;
+        }
         initializePieces();
 
         this.setPreferredSize(new Dimension(400, 400));
@@ -93,9 +101,13 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
     // number of pieces on either side.
     // it's up to you how you wish to arrange your pieces.
     void initializePieces() {
-
-        board[0][0].put(new Piece(true, RESOURCES_WKING_PNG));
-
+        
+        board[7][4].put(new Piece(true, RESOURCES_WKING_PNG));
+        board[0][4].put(new Piece(true, RESOURCES_BKING_PNG));
+         for (int i = 0; i < 8; i++) {
+            board[6][i].put(new Piece(true, RESOURCES_WPAWN_PNG));
+            board[1][i].put(new Piece(false, RESOURCES_BPAWN_PNG));
+         }
     }
 
     public Square[][] getSquareArray() {
@@ -154,6 +166,45 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
     public void mouseReleased(MouseEvent e) {
         endSquare = (Square) this.getComponentAt(new Point(e.getX(), e.getY()));
 
+        // Check if we have a valid starting piece and destination
+        if (currPiece != null && fromMoveSquare != null && endSquare != null) {
+            // Get legal moves for the piece
+            ArrayList<Square> legalMoves = currPiece.getLegalMoves(this, fromMoveSquare);
+            
+            // Check if the destination is a legal move
+            if (legalMoves.contains(endSquare)) {
+                // Note: if pawn captures the king, it's removed here
+                Piece capturedPiece = endSquare.removePiece();
+                if (capturedPiece != null && capturedPiece.isKing()) {
+                    // Pawn ate the king!
+                    String playerColor = currPiece.getColor() ? "White" : "Black";
+                    JOptionPane.showMessageDialog(
+                        null,
+                        playerColor + " pawn ate the king! " + playerColor + " wins!\nGame Over!",
+                        "King Captured",
+                        JOptionPane.INFORMATION_MESSAGE);
+                }
+                
+                // Move the piece to the new square
+                fromMoveSquare.removePiece();
+                endSquare.put(currPiece);
+                
+                // Check if pawn reached the end (row 0 or row 7) - either way, that color wins!
+                int destRow = endSquare.getRow();
+                if (destRow == 0 || destRow == 7) {
+                    String playerColor = currPiece.getColor() ? "White" : "Black";
+                    JOptionPane.showMessageDialog(
+                        null,
+                        playerColor + " pawn reached the end! " + playerColor + " wins!\nGame Over!",
+                        "Pawn Promotion",
+                        JOptionPane.INFORMATION_MESSAGE);
+                }
+                
+                // Switch turns
+                whiteTurn = !whiteTurn;
+            }
+        }
+        
         // using currPiece
         if(fromMoveSquare!= null){
             fromMoveSquare.setDisplay(true);
